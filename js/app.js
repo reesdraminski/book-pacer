@@ -8,7 +8,17 @@ const bookEntryModal = document.getElementById("bookEntryModal");
 const modalCloseButton = document.getElementById("close");
 const addBookForm = document.getElementById("addBookForm");
 
+const bookTitleInput = document.getElementById("bookTitle");
+const bookAuthorInput = document.getElementById("bookAuthor");
+const numPagesInput = document.getElementById("numPages");
+const pagesReadInput = document.getElementById("pagesRead");
+const goalDaysInput = document.getElementById("goalDays");
+const goalStartInput = document.getElementById("goalStart");
+const numSessionsInput = document.getElementById("numSessions");
+
 const books = [];
+
+let currentlyEditing;
 
 /**
  * Retrieve data from storage and initialize UI components.
@@ -57,40 +67,56 @@ function bindListeners() {
 }
 
 /**
- * Intercept the Add Book form from being submitted.
+ * Intercept the book entry form from being submitted.
+ * This handles both adding new books and editing existing books.
  * @param {Event} e 
  */
 addBookForm.onsubmit = e => {
     // prevent the form from actually submitting
     e.preventDefault();
 
-    // create a FormData object to easily query form data
-    const formData = new FormData(addBookForm);
-
     // extract data from the form
-    const title = formData.get("bookTitle");
-    const author = formData.get("bookAuthor");
-    const numPages = formData.get("numPages");
-    const pagesRead = formData.get("pagesRead");
-    const numDays = formData.get("numDays");
-    const numSessions = formData.get("numSessions");
+    const title = bookTitleInput.value;
+    const author = bookAuthorInput.value;
+    const numPages = numPagesInput.value;
+    const pagesRead = pagesReadInput.value;
+    const goalDays = goalDaysInput.value;
+    const numSessions = numSessionsInput.value;
 
     // get goal start date and transform to ensure accurate date parsing
-    const goalStart = formData.get("goalStart");
-    const [ year, month, day ] = goalStart.split("-");
+    const goalStart = goalStartInput.value;
+    const [year, month, day] = goalStart.split("-");
     const rearrangedDate = `${month}/${day}/${year}`;
     const goalStartTime = new Date(rearrangedDate).getTime();
 
+    // edit the new book
+    if (currentlyEditing)
+    {
+        // set the attributes of the existing book object
+        currentlyEditing.title = title;
+        currentlyEditing.author = author;
+        currentlyEditing.pagesRead = pagesRead;
+        currentlyEditing.numPages = numPages;
+        currentlyEditing.goalStart = goalStartTime;
+        currentlyEditing.goalDays = goalDays;
+        currentlyEditing.numSessions = numSessions;
+
+        // reset to not editing anything
+        currentlyEditing = null;
+    }
     // add the new book
-    books.push({
-        title: title,
-        author: author,
-        pagesRead: pagesRead,
-        numPages: numPages,
-        goalStart: goalStartTime,
-        goalDays: numDays,
-        numSessions: numSessions
-    });
+    else 
+    {
+        books.push({
+            title: title,
+            author: author,
+            pagesRead: pagesRead,
+            numPages: numPages,
+            goalStart: goalStartTime,
+            goalDays: goalDays,
+            numSessions: numSessions
+        });
+    }
 
     // save the changes to the book
     saveData();
@@ -104,6 +130,7 @@ addBookForm.onsubmit = e => {
     // re-render the books display
     render();
 }
+
 
 /**
  * Show the user's book pacings.
@@ -260,13 +287,27 @@ function render() {
             }
         });
 
-        // createElement(buttonContainer, "button", {
-        //     textContent: "Edit Book information",
-        //     style: "margin-right: 5px",
-        //     onclick: () => {
+        // add a edit book information button
+        createElement(buttonContainer, "button", {
+            textContent: "Edit Book Information",
+            style: "margin-right: 5px",
+            onclick: () => {
+                // open modal
+                bookEntryModal.style.display = "block";
 
-        //     }
-        // });
+                // pre-populate the form inputs
+                bookTitleInput.value = book.title;
+                bookAuthorInput.value = book.author;
+                numPagesInput.value = book.numPages;
+                pagesReadInput.value = book.pagesRead;
+                goalDaysInput.value = book.goalDays;
+                goalStartInput.value = new Date(book.goalStart).toLocaleDateString("en-CA");
+                numSessionsInput.value = book.numSessions;
+
+                // set the currently editing book
+                currentlyEditing = book;
+            }
+        });
 
         // add a delete book button
         createElement(buttonContainer, "button", { 
