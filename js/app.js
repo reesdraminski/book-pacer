@@ -154,8 +154,25 @@ function render() {
         // calculate how many pages the user needs to read per session
         const pagesPerSession = Math.ceil(book.numPages / (book.numDays * book.numSessions));
 
+        // save the pages read count at the start of the day
+        if (!book.hasOwnProperty("dailyStartPages"))
+        {
+            book.dayRead = new Date().getTime();
+            book.dailyStartPages = book.pagesRead;
+        }
+        // if there is a reading date associated
+        else
+        {
+            // if reading sessions were on a different day
+            if (!datesAreOnSameDay(new Date(book.dayRead), new Date()))
+            {
+                book.dayRead = new Date().getTime();
+                book.dailyStartPages = book.pagesRead;
+            }
+        }
+
         // add session summaries to tell the user how much they need to read per session
-        let prevPageNum = parseInt(book.pagesRead, 10);
+        let prevPageNum = parseInt(book.dailyStartPages, 10);
         for (let i = 0; i < book.numSessions; i++) 
         {
             const nextPageNum = prevPageNum + pagesPerSession;
@@ -208,6 +225,14 @@ function render() {
             }
         });
 
+        // createElement(buttonContainer, "button", {
+        //     textContent: "Edit Book information",
+        //     style: "margin-right: 5px",
+        //     onclick: () => {
+
+        //     }
+        // });
+
         // add a delete book button
         createElement(buttonContainer, "button", { 
             textContent: "Delete Book",
@@ -244,6 +269,18 @@ function saveData() {
     {
         localStorage.setItem(SAVE_LOCATION, JSON.stringify(books));
     }
+}
+
+/**
+ * Check to see if two dates are the same day.
+ * @param {Date} first 
+ * @param {Date} second 
+ * @return {Boolean} areOnSameDay
+ */
+function datesAreOnSameDay(first, second) {
+    return first.getFullYear() === second.getFullYear() 
+        && first.getMonth() === second.getMonth() 
+        && first.getDate() === second.getDate()
 }
 
 /**
