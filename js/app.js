@@ -30,6 +30,9 @@ const books = [];
     // bind button click and keydown listeners
     bindListeners();
 
+    // set the default reading start date to today
+    document.getElementById("goalStart").value = new Date().toLocaleDateString("en-CA");
+
     // render the book items
     render();
 })();
@@ -72,13 +75,20 @@ addBookForm.onsubmit = e => {
     const numDays = formData.get("numDays");
     const numSessions = formData.get("numSessions");
 
+    // get goal start date and transform to ensure accurate date parsing
+    const goalStart = formData.get("goalStart");
+    const [ year, month, day ] = goalStart.split("-");
+    const rearrangedDate = `${month}/${day}/${year}`;
+    const goalStartTime = new Date(rearrangedDate).getTime();
+
     // add the new book
     books.push({
         title: title,
         author: author,
         pagesRead: pagesRead,
         numPages: numPages,
-        numDays: numDays,
+        goalStart: goalStartTime,
+        goalDays: numDays,
         numSessions: numSessions
     });
 
@@ -108,7 +118,7 @@ function render() {
         // show a message to the user that they haven't added any books yet
         createElement(booksSection, "div", { 
             class: "box",
-            innerHTML: "<p style='margin-bottom: 0'>You have not added any books yet!</p>"
+            innerHTML: "<p style='margin-bottom: 0; margin-top: 0;'>You have not added any books yet!</p>"
         });
         
         return;
@@ -125,7 +135,32 @@ function render() {
             style: "margin-top: 0"
         });
 
-        // create a header for reading sessions list
+        // create a header for duration goal progress bar
+        createElement(bookDiv, "p", { 
+            textContent: "Progress of Reading Duration Goal:",
+            style: "font-weight: bold; margin-bottom: 5px"
+        });
+
+        // calculate how much time has passed since reading start
+        const delta = new Date().getTime() - book.goalStart;
+        const days = delta / (24 * 60 * 60 * 1000);
+
+        // only show if the goal has started
+        if (delta > 0)
+        {
+            // add reading duration goal progress bar
+            createElement(bookDiv, "progress", {
+                value: days,
+                max: book.goalDays
+            });
+
+            // add days readout to provide context for progress bar
+            createElement(bookDiv, "span", { 
+                textContent: `You are on day ${Math.floor(days)} of ${book.goalDays} of your goal.`
+            });
+        }
+
+        // create a header for reading progress bar
         createElement(bookDiv, "p", { 
             textContent: "Your Reading Progress:",
             style: "font-weight: bold; margin-bottom: 5px"
@@ -152,7 +187,7 @@ function render() {
         const sessionsList = createElement(bookDiv, "ol", { style: "margin-top: .5em;" });
 
         // calculate how many pages the user needs to read per session
-        const pagesPerSession = Math.ceil(book.numPages / (book.numDays * book.numSessions));
+        const pagesPerSession = Math.ceil(book.numPages / (book.goalDays * book.numSessions));
 
         // save the pages read count at the start of the day
         if (!book.hasOwnProperty("dailyStartPages"))

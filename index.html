@@ -20,23 +20,30 @@
                 <h3>Let's Add a Book to Your Reading List!</h3>
             
                 <form id="addBookForm">
-                    <label for="bookTitle">Book Title</label>
+                    <label for="bookTitle">Book Title*</label>
                     <input type="text" id="bookTitle" name="bookTitle" required>
 
-                    <label for="bookAuthor">Book Author</label>
+                    <label for="bookAuthor">Book Author*</label>
                     <input type="text" id="bookAuthor" name="bookAuthor" required>
 
-                    <label for="numPages">Total Number of Pages</label>
+                    <label for="numPages">Total Number of Pages*</label>
                     <input type="number" min="0" id="numPages" name="numPages" required>
 
-                    <label for="pagesRead">Number of Pages You've Already Read</label>
+                    <label for="pagesRead">Number of Pages You've Already Read*</label>
                     <input type="number" min="0" value="0" id="pagesRead" name="pagesRead" required>
 
-                    <label for="numDays">Number of Days</label>
+                    <label for="numDays">Goal Reading Duration (Number of Days)*</label>
                     <input type="number" min="1" value="7" id="numDays" name="numDays" required>
 
-                    <label for="numSessions">Number of Reading Sessions Per Day</label>
+                    <label for="goalStart">Reading Start Date*</label>
+                    <input type="date" id="goalStart" name="goalStart" required>
+
+                    <label for="numSessions">Number of Reading Sessions Per Day*</label>
                     <input type="number" min="1" value="2" id="numSessions" name="numSessions" required>
+
+                    <p>
+                        *Required
+                    </p>
             
                     <input id="saveItems" class="btn" type="submit" value="Save">
                 </form>
