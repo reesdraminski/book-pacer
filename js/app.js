@@ -268,7 +268,7 @@ function render() {
                     alert("That is not a valid page number.");
                 }
                 // if the user enters a page number that is prior to the current page number
-                else if (newPages < book.pagesRead) 
+                else if (parseInt(newPages, 10) < book.pagesRead) 
                 {
                     if (!confirm("Are you sure you want to put a lower page number?"))
                     {
